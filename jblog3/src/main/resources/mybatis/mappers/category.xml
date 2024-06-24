@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="category">
+	<insert id="insert" parameterType="categoryvo">
+		<![CDATA[
+			insert
+			  into category
+		    values (null, #{name }, #{description }, current_date(), #{blogId })
+		]]>
+	</insert>
+	
+	<select id="findAll" resultType="map">
+		<![CDATA[
+			select distinct(c.no), c.name, c.description, c.id as blogId,
+			  	   (select count(*)
+			  	      from post p
+			  	     where p.category_no = c.no) as postCount
+			  from category c left join post p 
+									 on p.category_no = c.no
+			 where id = #{blogId }
+		]]>
+	</select>
+	
+	<delete id="delete" parameterType="map">
+		<![CDATA[
+			delete
+			  from category
+			 where no = #{no }
+		]]>
+	</delete>
+	
+	<select id="findPostCount" resultType="int">
+		<![CDATA[
+			select count(*)
+			  from post
+			 where category_no = #{no }
+		]]>
+	</select>
+	
+	<update id="changeCategoryPosts" parameterType="map">
+		<![CDATA[
+			update post
+			   set category_no = (select no
+			    					from category
+			    				   where id = #{blogId }
+			    				   limit 0,1)
+			 where category_no = #{no }
+		]]>		
+	</update>
+</mapper>
